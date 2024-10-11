@@ -1,0 +1,260 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="/">Mantenimiento</a></li>
+    <li class="breadcrumb-item active">Marcas</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-users me-1"></i>Lista de Marcas
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" id="crearMarcaBtn">Crear Marca</button>
+            </div>
+        </div>
+        <hr />
+
+        <table id="tMarca" class="display cell-border" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>IdMarca</th>
+                    <th>Nombre</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                    <th> </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<!-- Modal Bootstrap -->
+<div class="modal fade" id="marcaModal" tabindex="-1" aria-labelledby="marcaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="marcaModalLabel">Detalles de la Marca</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="marcaForm">
+                    <input type="hidden" id="IdMarca" name="IdMarca">
+                    <div class="mb-3">
+                        <label for="NombreMarca" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="NombreMarca" name="NombreMarca" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Estado" class="form-label">Estado</label>
+                        <select class="form-control" id="Estado" name="Estado">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="saveMarcaBtn">Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts{
+
+    <script>
+        $(document).ready(function () {
+            $('#tMarca').DataTable({
+                processing: true,
+                serverSide: false,
+                ajax: {
+                    url: "/Marcas/Listar",
+                    type: "GET",
+                    datatype: "json",
+                    dataSrc: "data"
+                },
+                columns: [
+                    { data: "IdMarca" },
+                    { data: "NombreMarca" },
+                    {
+                        data: "Estado",
+                        render: function (data) {
+                            return data ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>';
+                        }
+                    },
+                    {
+                        data: "Fecha",
+                        render: function (data) {
+                            var date = new Date(data);
+                            return date.toLocaleDateString();
+                        }
+                    },
+                    {
+                        data: "IdMarca",
+                        render: function (data) {
+                            return `
+                                <button class="btn btn-primary btn-sm" onclick="editarMarca(${data})"><i class="fas fa-pen"></i></button>
+                                <button class="btn btn-danger btn-sm" onclick="eliminarMarca(${data})"><i class="fas fa-trash"></i></button>`;
+                        }
+                    }
+                ],
+                language: {
+                    emptyTable: "No hay marcas disponibles",
+                    lengthMenu: "Mostrar _MENU_ marcas por página",
+                    zeroRecords: "No se encontraron resultados",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ marcas",
+                    infoEmpty: "Mostrando 0 a 0 de 0 marcas",
+                    infoFiltered: "(filtrado de _MAX_ total de marcas)",
+                    search: "Buscar:",
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "Siguiente",
+                        previous: "Anterior"
+                    }
+                }
+            });
+
+
+            // Botón Guardar/Cambiar en el modal
+            $('#saveMarcaBtn').click(function () {
+                var id = $('#IdMarca').val();
+                if (id) {
+                    actualizarMarca(id); 
+                } else {
+                    guardarMarca();  
+                }
+            });
+
+            $('#crearMarcaBtn').click(function () {
+                // Limpiar el formulario
+                $('#marcaForm')[0].reset();  
+                $('#IdMarca').val('');  
+                $('#NombreMarca').prop('disabled', false);  
+                $('#Estado').prop('disabled', false);  
+                $('#saveMarcaBtn').show(); 
+                $('#marcaModalLabel').text('Crear Marca');  
+                $('#marcaModal').modal('show');  
+            });
+        });
+
+        // Función para abrir el modal con los detalles de la marca (solo lectura)
+        function verMarca(id) {
+            $.ajax({
+                url: '/Marcas/Detalle/' + id,
+                type: 'GET',
+                success: function (response) {
+                    if (response.success) {
+                        $('#IdMarca').val(response.data.IdMarca);
+                        $('#NombreMarca').val(response.data.NombreMarca).prop('disabled', true); // Campo deshabilitado
+                        $('#Estado').val(response.data.Estado.toString()).prop('disabled', true);  // Campo deshabilitado
+                        $('#marcaModalLabel').text('Detalles de la Marca');
+                        $('#saveMarcaBtn').hide();  // Ocultar botón guardar
+                        $('#marcaModal').modal('show');  // Mostrar modal
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        }
+
+        // Función para abrir el modal para editar la marca
+        function editarMarca(id) {
+            $.ajax({
+                url: '/Marcas/Detalle/' + id,
+                type: 'GET',
+                success: function (response) {
+                    if (response.success) {
+                        $('#IdMarca').val(response.data.IdMarca);
+                        $('#NombreMarca').val(response.data.NombreMarca).prop('disabled', false);  // Habilitar campo
+                        $('#Estado').val(response.data.Estado.toString()).prop('disabled', false);  // Habilitar campo
+                        $('#marcaModalLabel').text('Editar Marca');
+                        $('#saveMarcaBtn').show();  // Mostrar botón guardar
+                        $('#marcaModal').modal('show');  // Mostrar modal
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        }
+
+        // Función para guardar una nueva marca
+        function guardarMarca() {
+            var data = {
+                NombreMarca: $('#NombreMarca').val(),
+                Estado: $('#Estado').val()
+            };
+            $.ajax({
+                url: '/Marcas/Crear',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+                    if (response.success) {
+                        $('#tMarca').DataTable().ajax.reload();
+                        $('#marcaModal').modal('hide');
+                        alert('Marca creada exitosamente');
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        }
+
+        // Función para actualizar una marca existente
+        function actualizarMarca(id) {
+            var data = {
+                IdMarca: id,
+                NombreMarca: $('#NombreMarca').val(),
+                Estado: $('#Estado').val()
+            };
+            $.ajax({
+                url: '/Marcas/Actualizar',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+                    if (response.success) {
+                        $('#tMarca').DataTable().ajax.reload();
+                        $('#marcaModal').modal('hide');
+                        alert('Marca actualizada exitosamente');
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        }
+
+        // Función para eliminar una marca
+        function eliminarMarca(id) {
+            if (confirm("¿Estás seguro de que deseas eliminar esta marca?")) {
+                $.ajax({
+                    url: '/Marcas/Eliminar',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (response) {
+                        if (response.success) {
+                            $('#tMarca').DataTable().ajax.reload();
+                            alert('Marca eliminada exitosamente');
+                        } else {
+                            alert(response.message);
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+
+}
