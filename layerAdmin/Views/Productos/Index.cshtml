@@ -112,6 +112,43 @@
     </div>
 </div>
 
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="deleteProductoModal" tabindex="-1" aria-labelledby="deleteProductoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Eliminar Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar este producto?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteProductoBtn">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Mensajes -->
+<div class="modal fade" id="messageProductoModal" tabindex="-1" aria-labelledby="messageProductoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mensaje</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="messageProductoModalBody">
+                <!-- Mensaje dinámico -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section scripts{
 
     <script>
@@ -130,8 +167,8 @@
                     { data: "IdProducto" },
                     { data: "NombreProducto" },
                     { data: "Descripcion" },
-                    { data: "oMarca.NombreMarca" }, 
-                    { data: "oCategoria.DescripcionCategoria" }, 
+                    { data: "oMarca.NombreMarca" },
+                    { data: "oCategoria.DescripcionCategoria" },
                     {
                         data: "Precio",
                         render: function (data) {
@@ -156,8 +193,8 @@
                         data: "IdProducto",
                         render: function (data) {
                             return `
-                                <button class="btn btn-primary btn-sm" onclick="editarProducto(${data})"><i class="fas fa-pen"></i></button>
-                                <button class="btn btn-danger btn-sm" onclick="eliminarProducto(${data})"><i class="fas fa-trash"></i></button>`;
+                                    <button class="btn btn-primary btn-sm" onclick="editarProducto(${data})"><i class="fas fa-pen"></i></button>
+                                    <button class="btn btn-danger btn-sm" onclick="eliminarProducto(${data})"><i class="fas fa-trash"></i></button>`;
                         }
                     }
                 ],
@@ -231,7 +268,7 @@
         // Función para cargar las Categorías en el select
         function cargarCategorias(selectedId) {
             $.ajax({
-                url: '/Mantenimientos/ListarCategorias', 
+                url: '/Mantenimientos/ListarCategorias',
                 type: 'GET',
                 success: function (response) {
                     if (response.data) {
@@ -379,27 +416,41 @@
             });
         }
 
-        // Función para eliminar un producto
+        var productoIdToDelete = null;
+
+        // Función para eliminar un producto usando un modal de confirmación
         function eliminarProducto(id) {
-            if (confirm("¿Estás seguro de que deseas eliminar este producto?")) {
+            productoIdToDelete = id;
+            $('#deleteProductoModal').modal('show');
+        }
+
+        // Confirmar eliminación de producto
+        $('#confirmDeleteProductoBtn').click(function () {
+            if (productoIdToDelete) {
                 $.ajax({
                     url: '/Productos/Eliminar',
                     type: 'POST',
-                    data: { id: id },
+                    data: { id: productoIdToDelete },
                     success: function (response) {
                         if (response.success) {
                             $('#tProducto').DataTable().ajax.reload();
-                            alert('Producto eliminado exitosamente.');
+                            $('#deleteProductoModal').modal('hide');
+                            $('#messageProductoModalBody').text('Producto eliminado exitosamente.');
+                            $('#messageProductoModal').modal('show');
                         } else {
-                            alert('Error: ' + response.message);
+                            $('#deleteProductoModal').modal('hide');
+                            $('#messageProductoModalBody').text(response.message);
+                            $('#messageProductoModal').modal('show');
                         }
                     },
                     error: function () {
-                        alert('Error al eliminar el producto.');
+                        $('#deleteProductoModal').modal('hide');
+                        $('#messageProductoModalBody').text('Error al eliminar el producto.');
+                        $('#messageProductoModal').modal('show');
                     }
                 });
             }
-        }
+        });
 
     </script>
 
