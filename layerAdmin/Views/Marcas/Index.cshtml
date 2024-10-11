@@ -73,6 +73,43 @@
 </div>
 
 
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="deleteMarcaModal" tabindex="-1" aria-labelledby="deleteMarcaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Eliminar Marca</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar esta marca?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteMarcaBtn">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Mensajes -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mensaje</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="messageModalBody">
+                <!-- Mensaje dinámico -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 @section scripts{
 
@@ -107,8 +144,8 @@
                         data: "IdMarca",
                         render: function (data) {
                             return `
-                                <button class="btn btn-primary btn-sm" onclick="editarMarca(${data})"><i class="fas fa-pen"></i></button>
-                                <button class="btn btn-danger btn-sm" onclick="eliminarMarca(${data})"><i class="fas fa-trash"></i></button>`;
+                                        <button class="btn btn-primary btn-sm" onclick="editarMarca(${data})"><i class="fas fa-pen"></i></button>
+                                        <button class="btn btn-danger btn-sm" onclick="eliminarMarca(${data})"><i class="fas fa-trash"></i></button>`;
                         }
                     }
                 ],
@@ -134,21 +171,21 @@
             $('#saveMarcaBtn').click(function () {
                 var id = $('#IdMarca').val();
                 if (id) {
-                    actualizarMarca(id); 
+                    actualizarMarca(id);
                 } else {
-                    guardarMarca();  
+                    guardarMarca();
                 }
             });
 
             $('#crearMarcaBtn').click(function () {
                 // Limpiar el formulario
-                $('#marcaForm')[0].reset();  
-                $('#IdMarca').val('');  
-                $('#NombreMarca').prop('disabled', false);  
-                $('#Estado').prop('disabled', false);  
-                $('#saveMarcaBtn').show(); 
-                $('#marcaModalLabel').text('Crear Marca');  
-                $('#marcaModal').modal('show');  
+                $('#marcaForm')[0].reset();
+                $('#IdMarca').val('');
+                $('#NombreMarca').prop('disabled', false);
+                $('#Estado').prop('disabled', false);
+                $('#saveMarcaBtn').show();
+                $('#marcaModalLabel').text('Crear Marca');
+                $('#marcaModal').modal('show');
             });
         });
 
@@ -238,23 +275,39 @@
         }
 
         // Función para eliminar una marca
+        // Función para eliminar una marca usando un modal de confirmación
         function eliminarMarca(id) {
-            if (confirm("¿Estás seguro de que deseas eliminar esta marca?")) {
+            marcaIdToDelete = id;
+            $('#deleteMarcaModal').modal('show');
+        }
+
+        // Confirmar eliminación de marca
+        $('#confirmDeleteMarcaBtn').click(function () {
+            if (marcaIdToDelete) {
                 $.ajax({
                     url: '/Marcas/Eliminar',
                     type: 'POST',
-                    data: { id: id },
+                    data: { id: marcaIdToDelete },
                     success: function (response) {
                         if (response.success) {
                             $('#tMarca').DataTable().ajax.reload();
-                            alert('Marca eliminada exitosamente');
+                            $('#deleteMarcaModal').modal('hide');
+                            $('#messageModalBody').text('Marca eliminada exitosamente.');
+                            $('#messageModal').modal('show');
                         } else {
-                            alert(response.message);
+                            $('#deleteMarcaModal').modal('hide');
+                            $('#messageModalBody').text(response.message);
+                            $('#messageModal').modal('show');
                         }
+                    },
+                    error: function () {
+                        $('#deleteMarcaModal').modal('hide');
+                        $('#messageModalBody').text('Error al eliminar la marca.');
+                        $('#messageModal').modal('show');
                     }
                 });
             }
-        }
+        });
     </script>
 
 }
