@@ -1,12 +1,9 @@
 ﻿using layerEntidad;
 using layerNegocio;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
-namespace layerAdmin.Controllers
+namespace layerAdmin.Controllers 
 {
     public class ProductosController : Controller
     {
