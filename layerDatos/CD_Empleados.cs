@@ -27,6 +27,7 @@ namespace layerDatos
                 using (SqlCommand command = new SqlCommand("SP_ListarEmpleados", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@Patron", Patron);
 
                     connection.Open();
 

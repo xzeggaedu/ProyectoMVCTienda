@@ -40,11 +40,10 @@
                 </tr>
             </tbody>
         </table>
-
     </div>
 </div>
 
-<!-- Modal Bootstrap -->
+<!-- Modal para crear o editar empleados -->
 <div class="modal fade" id="empleadoModal" tabindex="-1" aria-labelledby="empleadoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -96,16 +95,16 @@
     </div>
 </div>
 
-<!-- Modal de Mensajes -->
-<div class="modal fade" id="messageEmpleadoModal" tabindex="-1" aria-labelledby="messageEmpleadoModalLabel" aria-hidden="true">
+<!-- Modal para mostrar mensajes de confirmación -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Mensaje</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title" id="messageModalLabel">Mensaje</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="messageEmpleadoModalBody">
-                <!-- Mensaje dinámico -->
+            <div class="modal-body" id="messageModalBody">
+                <!-- Aquí se mostrará el mensaje dinámico -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
@@ -151,8 +150,7 @@
                     {
                         data: "IdEmpleado",
                         render: function (data) {
-                            return `
-                                    <button class="btn btn-primary btn-sm" onclick="editarEmpleado(${data})"><i class="fas fa-pen"></i></button>`;
+                            return `<button class="btn btn-primary btn-sm" onclick="editarEmpleado(${data})"><i class="fas fa-pen"></i></button>`;
                         }
                     }
                 ],
@@ -216,41 +214,23 @@
                     if (response.success) {
                         $('#tEmpleado').DataTable().ajax.reload();
                         $('#empleadoModal').modal('hide');
-                        alert('Empleado creado exitosamente.');
+                        mostrarMensaje('Empleado creado exitosamente.');
                     } else {
-                        alert('Error: ' + response.message);
+                        mostrarMensaje('Error: ' + response.message);
                     }
                 },
                 error: function () {
-                    alert('Error al crear el empleado.');
+                    mostrarMensaje('Error al crear el empleado.');
                 }
             });
         }
 
-        // Función para abrir el modal para editar el empleado
-        function editarEmpleado(id) {
-            $.ajax({
-                url: '/Empleados/Detalle/' + id,
-                type: 'GET',
-                success: function (response) {
-                    if (response.success) {
-                        var empleado = response.data;
-                        $('#IdEmpleado').val(empleado.IdEmpleado);
-                        $('#Nombres').val(empleado.Nombres).prop('disabled', false);
-                        $('#Apellidos').val(empleado.Apellidos).prop('disabled', false);
-                        $('#Dui').val(empleado.Dui).prop('disabled', false);
-                        $('#Direccion').val(empleado.Direccion).prop('disabled', false);
-                        $('#Email').val(empleado.Email).prop('disabled', false);
-                        $('#Telefono').val(empleado.Telefono).prop('disabled', false);
-                        $('#Estado').val(empleado.Estado.toString()).prop('disabled', false);
-                        $('#empleadoModalLabel').text('Editar Empleado');
-                        $('#saveEmpleadoBtn').show();
-                        $('#empleadoModal').modal('show');
-                    } else {
-                        alert(response.message);
-                    }
-                }
-            });
+
+        // Función para mostrar el modal de mensaje
+        function mostrarMensaje(mensaje) {
+            $('#messageModalBody').text(mensaje);
+            $('#messageModal').modal('show');
         }
+
     </script>
 }

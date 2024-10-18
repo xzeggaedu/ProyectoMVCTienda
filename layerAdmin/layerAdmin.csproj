@@ -122,9 +122,6 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\EmpleadosController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\MantenimientosController.cs" />
-    <Compile Include="Controllers\MarcasController.cs" />
-    <Compile Include="Controllers\ProductosController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -463,11 +460,6 @@
     <Content Include="webfonts\fa-brands-400.ttf" />
     <Content Include="webfonts\fa-brands-400.eot" />
     <Content Include="Views\Home\Usuarios.cshtml" />
-    <Content Include="Views\Mantenimientos\Categorias.cshtml" />
-    <Content Include="Views\Mantenimientos\Marcas.cshtml" />
-    <Content Include="Views\Mantenimientos\Productos.cshtml" />
-    <Content Include="Views\Marcas\Index.cshtml" />
-    <Content Include="Views\Productos\Index.cshtml" />
     <Content Include="Views\Empleados\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
