@@ -47,6 +47,7 @@
     <Compile Include="Departamentos.cs" />
     <Compile Include="DetalleVentas.cs" />
     <Compile Include="Distritos.cs" />
+    <Compile Include="Empleados.cs" />
     <Compile Include="Marca.cs" />
     <Compile Include="Productos.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

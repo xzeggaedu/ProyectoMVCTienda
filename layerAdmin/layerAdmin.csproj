@@ -120,6 +120,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\EmpleadosController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MantenimientosController.cs" />
     <Compile Include="Controllers\MarcasController.cs" />
@@ -467,6 +468,7 @@
     <Content Include="Views\Mantenimientos\Productos.cshtml" />
     <Content Include="Views\Marcas\Index.cshtml" />
     <Content Include="Views\Productos\Index.cshtml" />
+    <Content Include="Views\Empleados\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

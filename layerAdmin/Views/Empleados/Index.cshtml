@@ -1,0 +1,256 @@
+﻿@{
+    ViewBag.Title = "Empleados";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="/">Mantenimiento</a></li>
+    <li class="breadcrumb-item active">Empleados</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-users me-1"></i>Lista de Empleados
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" id="crearEmpleadoBtn">Crear Empleado</button>
+            </div>
+        </div>
+        <hr />
+
+        <table id="tEmpleado" class="display cell-border" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>IdEmpleado</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>DUI</th>
+                    <th>Dirección</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Estado</th>
+                    <th>Fecha Registro</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<!-- Modal Bootstrap -->
+<div class="modal fade" id="empleadoModal" tabindex="-1" aria-labelledby="empleadoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="empleadoModalLabel">Detalles del Empleado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="empleadoForm">
+                    <input type="hidden" id="IdEmpleado" name="IdEmpleado">
+                    <div class="mb-3">
+                        <label for="Nombres" class="form-label">Nombres</label>
+                        <input type="text" class="form-control" id="Nombres" name="Nombres" required maxlength="100">
+                    </div>
+                    <div class="mb-3">
+                        <label for="Apellidos" class="form-label">Apellidos</label>
+                        <input type="text" class="form-control" id="Apellidos" name="Apellidos" required maxlength="100">
+                    </div>
+                    <div class="mb-3">
+                        <label for="Dui" class="form-label">DUI</label>
+                        <input type="text" class="form-control" id="Dui" name="Dui" required maxlength="10">
+                    </div>
+                    <div class="mb-3">
+                        <label for="Direccion" class="form-label">Dirección</label>
+                        <textarea class="form-control" id="Direccion" name="Direccion" rows="3" required maxlength="255"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Email" class="form-label">Email</label>
+                        <input type="text" class="form-control" id="Email" name="Email" required maxlength="100">
+                    </div>
+                    <div class="mb-3">
+                        <label for="Telefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="Telefono" name="Telefono" required maxlength="100">
+                    </div>
+                    <div class="mb-3">
+                        <label for="Estado" class="form-label">Estado</label>
+                        <select class="form-control" id="Estado" name="Estado" required>
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="saveEmpleadoBtn">Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Mensajes -->
+<div class="modal fade" id="messageEmpleadoModal" tabindex="-1" aria-labelledby="messageEmpleadoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mensaje</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="messageEmpleadoModalBody">
+                <!-- Mensaje dinámico -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            // Inicializar DataTable
+            $('#tEmpleado').DataTable({
+                processing: true,
+                serverSide: false,
+                ajax: {
+                    url: "/Empleados/Listar",
+                    type: "GET",
+                    datatype: "json",
+                    dataSrc: "data"
+                },
+                columns: [
+                    { data: "IdEmpleado" },
+                    { data: "Nombres" },
+                    { data: "Apellidos" },
+                    { data: "Dui" },
+                    { data: "Direccion" },
+                    { data: "Email" },
+                    { data: "Telefono" },
+                    {
+                        data: "Estado",
+                        render: function (data) {
+                            return data ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>';
+                        }
+                    },
+                    {
+                        data: "Fecha",
+                        render: function (data) {
+                            var date = new Date(data);
+                            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                        }
+                    },
+                    {
+                        data: "IdEmpleado",
+                        render: function (data) {
+                            return `
+                                    <button class="btn btn-primary btn-sm" onclick="editarEmpleado(${data})"><i class="fas fa-pen"></i></button>`;
+                        }
+                    }
+                ],
+                language: {
+                    emptyTable: "No hay empleados disponibles",
+                    lengthMenu: "Mostrar _MENU_ empleados por página",
+                    zeroRecords: "No se encontraron resultados",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ empleados",
+                    infoEmpty: "Mostrando 0 a 0 de 0 empleados",
+                    infoFiltered: "(filtrado de _MAX_ total de empleados)",
+                    search: "Buscar:",
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "Siguiente",
+                        previous: "Anterior"
+                    }
+                }
+            });
+
+            // Botón Guardar/Cambiar en el modal
+            $('#saveEmpleadoBtn').click(function () {
+                var id = $('#IdEmpleado').val();
+                if (id) {
+                    actualizarEmpleado(id);
+                } else {
+                    guardarEmpleado();
+                }
+            });
+
+            $('#crearEmpleadoBtn').click(function () {
+                // Limpiar el formulario
+                $('#empleadoForm')[0].reset();
+                $('#IdEmpleado').val('');
+                $('#saveEmpleadoBtn').show();
+                $('#empleadoModalLabel').text('Crear Empleado');
+
+                // Habilitar todos los campos
+                $('#empleadoForm input, #empleadoForm select, #empleadoForm textarea').prop('disabled', false);
+
+                $('#empleadoModal').modal('show');
+            });
+        });
+
+        // Función para guardar un nuevo empleado
+        function guardarEmpleado() {
+            var data = {
+                Nombres: $('#Nombres').val(),
+                Apellidos: $('#Apellidos').val(),
+                Dui: $('#Dui').val(),
+                Direccion: $('#Direccion').val(),
+                Email: $('#Email').val(),
+                Telefono: $('#Telefono').val(),
+                Estado: $('#Estado').val() === 'true'
+            };
+            $.ajax({
+                url: '/Empleados/Crear',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+                    if (response.success) {
+                        $('#tEmpleado').DataTable().ajax.reload();
+                        $('#empleadoModal').modal('hide');
+                        alert('Empleado creado exitosamente.');
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function () {
+                    alert('Error al crear el empleado.');
+                }
+            });
+        }
+
+        // Función para abrir el modal para editar el empleado
+        function editarEmpleado(id) {
+            $.ajax({
+                url: '/Empleados/Detalle/' + id,
+                type: 'GET',
+                success: function (response) {
+                    if (response.success) {
+                        var empleado = response.data;
+                        $('#IdEmpleado').val(empleado.IdEmpleado);
+                        $('#Nombres').val(empleado.Nombres).prop('disabled', false);
+                        $('#Apellidos').val(empleado.Apellidos).prop('disabled', false);
+                        $('#Dui').val(empleado.Dui).prop('disabled', false);
+                        $('#Direccion').val(empleado.Direccion).prop('disabled', false);
+                        $('#Email').val(empleado.Email).prop('disabled', false);
+                        $('#Telefono').val(empleado.Telefono).prop('disabled', false);
+                        $('#Estado').val(empleado.Estado.toString()).prop('disabled', false);
+                        $('#empleadoModalLabel').text('Editar Empleado');
+                        $('#saveEmpleadoBtn').show();
+                        $('#empleadoModal').modal('show');
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        }
+    </script>
+}
