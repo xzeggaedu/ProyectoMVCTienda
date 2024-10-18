@@ -143,8 +143,22 @@
                     {
                         data: "Fecha",
                         render: function (data) {
-                            var date = new Date(data);
-                            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                            if (data) {
+                                
+                                var timestamp = data.match(/\/Date\((\d+)\)\//);
+                                if (timestamp) {
+                                    var date = new Date(parseInt(timestamp[1], 10)); 
+                                    if (!isNaN(date)) {
+                                        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                                    } else {
+                                        return "Fecha no válida";
+                                    }
+                                } else {
+                                    return "Fecha no válida";
+                                }
+                            } else {
+                                return "Sin fecha"; 
+                            }
                         }
                     },
                     {
